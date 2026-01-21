@@ -1,0 +1,7 @@
+TypeError: next is not a function
+TypeError: next is not a function
+    at model.<anonymous> (E:\anti-gravity\backend\models\User.js:25:5)
+    at async Kareem.execPre (E:\anti-gravity\backend\node_modules\kareem\index.js:65:24)
+    at async model.$__save (E:\anti-gravity\backend\node_modules\mongoose\lib\model.js:369:5)
+    at async model.save (E:\anti-gravity\backend\node_modules\mongoose\lib\model.js:609:5)
+    at async E:\anti-gravity\backend\debug_seed.js:22:13
