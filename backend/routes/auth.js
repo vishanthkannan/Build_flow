@@ -44,7 +44,7 @@ router.post('/login', async (req, res) => {
 const { protect, managerOnly } = require('../middleware/authMiddleware');
 
 router.post('/register', protect, managerOnly, async (req, res) => {
-    const { username, password, role } = req.body;
+    const { username, password, role, phone } = req.body;
 
     try {
         const userExists = await User.findOne({ username });
@@ -57,6 +57,7 @@ router.post('/register', protect, managerOnly, async (req, res) => {
             username,
             password,
             role: role || 'supervisor',
+            phone: phone || '',
         });
 
         if (user) {

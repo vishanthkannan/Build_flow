@@ -120,6 +120,77 @@ const appendToSheet = async (siteName, expenseData) => {
     }
 };
 
+/**
+ * Creates a new sheet (tab) for a site if it doesn't exist.
+ * @param {string} siteName 
+ */
+const createSiteSheet = async (siteName) => {
+    try {
+        const client = await getAuth();
+        const sheets = google.sheets({ version: 'v4', auth: client });
+
+        // 1. Check if sheet (tab) exists for siteName
+        const spreadsheet = await sheets.spreadsheets.get({
+            spreadsheetId: SHEET_ID,
+        });
+
+        const sheetExists = spreadsheet.data.sheets.some(
+            (s) => s.properties.title === siteName
+        );
+
+        if (sheetExists) {
+            console.log(`Sheet for ${siteName} already exists.`);
+            return;
+        }
+
+        // 2. Create sheet
+        await sheets.spreadsheets.batchUpdate({
+            spreadsheetId: SHEET_ID,
+            resource: {
+                requests: [
+                    {
+                        addSheet: {
+                            properties: {
+                                title: siteName,
+                            },
+                        },
+                    },
+                ],
+            },
+        });
+
+        // 3. Add Header Row
+        await sheets.spreadsheets.values.append({
+            spreadsheetId: SHEET_ID,
+            range: `${siteName}!A1`,
+            valueInputOption: 'USER_ENTERED',
+            resource: {
+                values: [
+                    [
+                        'Date',
+                        'Supervisor Name',
+                        'Site Name',
+                        'Material Name',
+                        'Quantity',
+                        'Price',
+                        'Total Amount',
+                        'Bill Number',
+                        'Bill Name / Shop Name',
+                        'Approved By',
+                        'Approval Date'
+                    ]
+                ]
+            }
+        });
+
+        console.log(`Created new sheet for site: ${siteName}`);
+    } catch (error) {
+        console.error('Error creating site sheet:', error);
+        // Don't throw, just log. We don't want to break site creation if sheets fails.
+    }
+};
+
 module.exports = {
     appendToSheet,
+    createSiteSheet,
 };

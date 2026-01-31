@@ -5,8 +5,11 @@ import SitesMaterialsScreen from '../screens/manager/SitesMaterialsScreen';
 import AllocationsScreen from '../screens/manager/AllocationsScreen';
 import ApprovalsScreen from '../screens/manager/ApprovalsScreen';
 import SiteExpensesScreen from '../screens/manager/SiteExpensesScreen';
+import ManagerActivityScreen from '../screens/manager/ManagerActivityScreen';
+import ManagerWagesScreen from '../screens/manager/ManagerWagesScreen';
 
 import AddSupervisorScreen from '../screens/manager/AddSupervisorScreen';
+import AddExpenseScreen from '../screens/supervisor/AddExpenseScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -19,6 +22,9 @@ const ManagerStack = () => {
             <Stack.Screen name="Approvals" component={ApprovalsScreen} options={{ title: 'Approvals' }} />
             <Stack.Screen name="AddSupervisor" component={AddSupervisorScreen} options={{ title: 'Add Supervisor' }} />
             <Stack.Screen name="SiteExpenses" component={SiteExpensesScreen} options={{ title: 'Site Expenses' }} />
+            <Stack.Screen name="ManagerActivity" component={ManagerActivityScreen} options={{ title: 'Daily Activity' }} />
+            <Stack.Screen name="ManagerWages" component={ManagerWagesScreen} options={{ title: 'Daily Wages' }} />
+            <Stack.Screen name="AddExpense" component={AddExpenseScreen} options={{ title: 'Daily Expense' }} />
         </Stack.Navigator>
     );
 };

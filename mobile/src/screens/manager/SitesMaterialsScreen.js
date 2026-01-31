@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { TextInput, Button, Title, List, SegmentedButtons } from 'react-native-paper';
 import api from '../../services/api';
+import { AuthContext } from '../../context/AuthContext';
 
 const SitesMaterialsScreen = ({ route, navigation }) => {
     const { viewMode } = route.params || {};
@@ -74,12 +75,17 @@ const SitesMaterialsScreen = ({ route, navigation }) => {
         }
     };
 
+    const { user } = React.useContext(AuthContext);
+    const isManager = user?.role === 'manager';
+
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 20 }}>
-                <Button mode={view === 'sites' ? 'contained' : 'outlined'} onPress={() => setView('sites')}>Sites</Button>
-                <Button mode={view === 'materials' ? 'contained' : 'outlined'} onPress={() => setView('materials')}>Materials</Button>
-            </View>
+            {isManager && (
+                <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 20 }}>
+                    <Button mode={view === 'sites' ? 'contained' : 'outlined'} onPress={() => setView('sites')}>Sites</Button>
+                    <Button mode={view === 'materials' ? 'contained' : 'outlined'} onPress={() => setView('materials')}>Materials</Button>
+                </View>
+            )}
 
             {view === 'sites' ? (
                 <View>

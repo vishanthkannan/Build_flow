@@ -6,7 +6,12 @@ const { Parser } = require('json2csv');
 
 router.get('/expenses', protect, managerOnly, async (req, res) => {
     try {
-        const expenses = await Expense.find({ status: 'Approved' })
+        const query = { status: 'Approved' };
+        if (req.query.site) {
+            query.site = req.query.site;
+        }
+
+        const expenses = await Expense.find(query)
             .populate('supervisor', 'username')
             .populate('site', 'name')
             .sort({ date: -1 });

@@ -15,6 +15,10 @@ const UserSchema = new mongoose.Schema({
         enum: ['manager', 'supervisor'],
         default: 'supervisor',
     },
+    phone: {
+        type: String,
+        default: '',
+    },
 }, { timestamps: true });
 
 UserSchema.pre('save', async function () {

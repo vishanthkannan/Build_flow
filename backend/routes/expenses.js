@@ -40,8 +40,9 @@ router.get('/', protect, async (req, res) => {
 // @route   POST /api/expenses
 // @access  Private/Supervisor
 router.post('/', protect, async (req, res) => {
-    if (req.user.role !== 'supervisor') {
-        return res.status(403).json({ message: 'Only supervisors can submit expenses' });
+    // Allow both supervisor and manager to submit expenses
+    if (req.user.role !== 'supervisor' && req.user.role !== 'manager') {
+        return res.status(403).json({ message: 'Not authorized to submit expenses' });
     }
 
     const {

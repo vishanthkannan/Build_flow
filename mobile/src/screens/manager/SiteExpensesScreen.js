@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { Title, Paragraph, DataTable, Card } from 'react-native-paper';
-import api from '../../services/api';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, StyleSheet, ScrollView, Linking } from 'react-native';
+import { Title, Paragraph, DataTable, Card, Button } from 'react-native-paper';
+import api, { API_URL } from '../../services/api';
+import { AuthContext } from '../../context/AuthContext';
 
 const SiteExpensesScreen = ({ route }) => {
     const { siteId, siteName } = route.params;
+    const { user } = useContext(AuthContext);
     const [expenses, setExpenses] = useState([]);
     const [total, setTotal] = useState(0);
 
@@ -35,6 +37,14 @@ const SiteExpensesScreen = ({ route }) => {
                     <Title>Total Approved</Title>
                     <Paragraph style={{ fontSize: 20, fontWeight: 'bold', color: 'green' }}>₹{total}</Paragraph>
                 </Card.Content>
+                <Card.Actions>
+                    <Button
+                        icon="download"
+                        onPress={() => Linking.openURL(`${API_URL}/reports/expenses?site=${siteId}&token=${user?.token}`)}
+                    >
+                        Download Report
+                    </Button>
+                </Card.Actions>
             </Card>
 
             <DataTable>
@@ -56,6 +66,7 @@ const SiteExpensesScreen = ({ route }) => {
                                 <View>
                                     <Paragraph style={{ fontSize: 12 }}>{expense.material_name}</Paragraph>
                                     <Paragraph style={{ fontSize: 10, color: 'gray' }}>Qty: {expense.quantity}</Paragraph>
+                                    <Paragraph style={{ fontSize: 10, color: 'blue' }}>By: {expense.supervisor?.username || 'Unknown'}</Paragraph>
                                 </View>
                             </DataTable.Cell>
                             <DataTable.Cell numeric>₹{expense.total_amount}</DataTable.Cell>

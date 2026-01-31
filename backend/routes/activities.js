@@ -6,7 +6,9 @@ const { protect } = require('../middleware/authMiddleware');
 router.get('/', protect, async (req, res) => {
     try {
         const query = req.user.role === 'manager' ? {} : { supervisor: req.user._id };
-        const activities = await DailyActivity.find(query).sort({ date: -1 });
+        const activities = await DailyActivity.find(query)
+            .populate('supervisor', 'username')
+            .sort({ date: -1 });
         res.json(activities);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });

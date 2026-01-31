@@ -18,7 +18,7 @@ router.get('/', protect, async (req, res) => {
 // @desc    Create a material
 // @route   POST /api/materials
 // @access  Private/Manager
-router.post('/', protect, managerOnly, async (req, res) => {
+router.post('/', protect, async (req, res) => {
     const { name, unit, base_price, shop_name } = req.body;
 
     try {

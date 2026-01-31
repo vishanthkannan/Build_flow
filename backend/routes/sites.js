@@ -3,6 +3,8 @@ const router = express.Router();
 const Site = require('../models/Site');
 const { protect, managerOnly } = require('../middleware/authMiddleware');
 
+const googleSheetsService = require('../services/googleSheetsService');
+
 // @desc    Get all sites
 // @route   GET /api/sites
 // @access  Private (Manager & Supervisor)
@@ -28,6 +30,10 @@ router.post('/', protect, managerOnly, async (req, res) => {
         });
 
         const createdSite = await site.save();
+
+        // Create Google Sheet tab
+        await googleSheetsService.createSiteSheet(name);
+
         res.status(201).json(createdSite);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });

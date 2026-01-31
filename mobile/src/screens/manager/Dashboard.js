@@ -1,13 +1,18 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Linking, Alert } from 'react-native';
-import { Card, Title, Paragraph, Button, Text } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, Alert, Dimensions, Linking } from 'react-native';
+import { Text, Card, Title, Button, TouchableRipple, Surface, useTheme, Avatar } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AuthContext } from '../../context/AuthContext';
-import api from '../../services/api';
+import api, { API_URL } from '../../services/api';
 import { useNavigation } from '@react-navigation/native';
+
+
+const { width } = Dimensions.get('window');
 
 const ManagerDashboard = () => {
     const { logout, user } = useContext(AuthContext);
     const navigation = useNavigation();
+    const theme = useTheme();
     const [summary, setSummary] = useState({
         totalAllocated: 0,
         approvedExpenses: 0,
@@ -17,7 +22,6 @@ const ManagerDashboard = () => {
     useEffect(() => {
         const fetchSummary = async () => {
             try {
-                // Fetch basic stats
                 const allocationsRes = await api.get('/allocations');
                 const expensesRes = await api.get('/expenses');
 
@@ -39,109 +43,192 @@ const ManagerDashboard = () => {
         fetchSummary();
     }, []);
 
+    const menuItems = [
+        { label: 'Approvals', icon: 'clipboard-check-outline', route: 'Approvals', color: '#10b981' }, // emerald-500
+        { label: 'Engineers', icon: 'account-hard-hat', route: 'AddSupervisor', color: '#3b82f6' }, // blue-500
+        { label: 'Site Exp.', icon: 'office-building-cog', route: 'SitesMaterials', params: { viewMode: 'sites' }, color: '#f59e0b' }, // amber-500
+        { label: 'Petty Cash', icon: 'wallet-outline', route: 'Allocations', color: '#8b5cf6' }, // violet-500
+        { label: 'Daily Expense', icon: 'cash-minus', route: 'AddExpense', color: '#ef4444' }, // red-500
+        { label: 'Material Rate', icon: 'tag-outline', route: 'SitesMaterials', params: { viewMode: 'materials' }, color: '#ec4899' }, // pink-500
+        { label: 'Daily Wages', icon: 'account-cash', route: 'ManagerWages', color: '#06b6d4' }, // cyan-500
+        { label: 'Site Location', icon: 'map-marker-outline', action: () => Alert.alert('Info', 'Site Location Feature'), color: '#f97316' }, // orange-500
+        { label: 'Site Surv.', icon: 'cctv', action: () => Alert.alert('Info', 'Site Surveillance Feature'), color: '#64748b' }, // slate-500
+        { label: 'Notification', icon: 'bell-outline', action: () => Alert.alert('Info', 'Notifications Feature'), color: '#eab308' }, // yellow-500
+        { label: 'Circular', icon: 'bullhorn-outline', action: () => Alert.alert('Info', 'Circular Announcement Feature'), color: '#14b8a6' }, // teal-500
+        { label: 'Activity', icon: 'chart-timeline-variant', route: 'ManagerActivity', color: '#6366f1' }, // indigo-500
+    ];
+
+    const handlePress = (item) => {
+        if (item.route) {
+            navigation.navigate(item.route, item.params);
+        } else if (item.action) {
+            item.action();
+        }
+    };
+
     return (
-        <ScrollView style={styles.container}>
+        <ScrollView style={[styles.container, { backgroundColor: '#f1f5f9' }]} contentContainerStyle={{ paddingBottom: 40 }}>
+            {/* Header */}
             <View style={styles.header}>
-                <Title>Manager Dashboard</Title>
-                <Button onPress={logout}>Logout</Button>
+                <View>
+                    <Text variant="headlineSmall" style={styles.welcomeText}>Welcome</Text>
+                    <Text variant="titleMedium" style={styles.userName}>{user?.username || 'Manager'}</Text>
+                </View>
+                <TouchableRipple onPress={logout} style={styles.logoutButton}>
+                    <MaterialCommunityIcons name="logout" size={24} color="#ef4444" />
+                </TouchableRipple>
             </View>
 
-            <Card style={styles.card}>
-                <Card.Content>
-                    <Title>Overview</Title>
-                    <Paragraph>Total Allocated: ₹{summary.totalAllocated}</Paragraph>
-                    <Paragraph>Approved Expenses: ₹{summary.approvedExpenses}</Paragraph>
-                    <Paragraph style={{ color: summary.pendingCount > 0 ? 'red' : 'green' }}>
-                        Pending Requests: {summary.pendingCount}
-                    </Paragraph>
-                </Card.Content>
-                <Card.Actions>
-                    <Button onPress={() => navigation.navigate('Approvals')}>View Requests</Button>
-                </Card.Actions>
-            </Card>
-
-            <View style={styles.grid}>
-                {/* Row 1 */}
-                <View style={styles.row}>
-                    <Button mode="contained" style={styles.gridButton} onPress={() => Alert.alert('Info', 'Daily Expense Report Feature')}>
-                        Daily Expense
-                    </Button>
-                    <Button mode="contained" style={styles.gridButton} onPress={() => navigation.navigate('SitesMaterials', { viewMode: 'materials' })}>
-                        Material Rate
-                    </Button>
+            {/* Stats Overview */}
+            <Surface style={styles.statsContainer} elevation={2}>
+                <View style={styles.statItem}>
+                    <Text style={styles.statLabel}>Allocated</Text>
+                    <Text style={[styles.statValue, { color: '#3b82f6' }]}>₹{summary.totalAllocated}</Text>
                 </View>
-
-                {/* Row 2 */}
-                <View style={styles.row}>
-                    <Button mode="contained" style={styles.gridButton} onPress={() => Alert.alert('Info', 'Daily Wages Feature')}>
-                        Daily Wages
-                    </Button>
-                    <Button mode="contained" style={styles.gridButton} onPress={() => Alert.alert('Info', 'Notifications Feature')}>
-                        Notification
-                    </Button>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                    <Text style={styles.statLabel}>Spent</Text>
+                    <Text style={[styles.statValue, { color: '#10b981' }]}>₹{summary.approvedExpenses}</Text>
                 </View>
-
-                {/* Row 3 */}
-                <View style={styles.row}>
-                    <Button mode="contained" style={styles.gridButton} onPress={() => Alert.alert('Info', 'Site Location Feature')}>
-                        Site Location
-                    </Button>
-                    <Button mode="contained" style={styles.gridButton} onPress={() => Alert.alert('Info', 'Site Surveillance Feature')}>
-                        Site Surv.
-                    </Button>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                    <Text style={styles.statLabel}>Pending</Text>
+                    <Text style={[styles.statValue, { color: summary.pendingCount > 0 ? '#ef4444' : '#64748b' }]}>
+                        {summary.pendingCount}
+                    </Text>
                 </View>
+            </Surface>
 
-                {/* Row 4 */}
-                <View style={styles.row}>
-                    <Button mode="contained" style={styles.gridButton} onPress={() => navigation.navigate('AddSupervisor')}>
-                        Engineers
-                    </Button>
-                    <Button mode="contained" style={styles.gridButton} onPress={() => navigation.navigate('Approvals')}>
-                        Approvals
-                    </Button>
-                </View>
-
-                {/* Row 5 */}
-                <View style={styles.row}>
-                    <Button mode="contained" style={styles.gridButton} onPress={() => navigation.navigate('Allocations')}>
-                        Petty Cash
-                    </Button>
-                    <Button mode="contained" style={styles.gridButton} onPress={() => navigation.navigate('SitesMaterials', { viewMode: 'sites' })}>
-                        Site Exp.
-                    </Button>
-                </View>
-
-                {/* Row 6 */}
-                <View style={styles.row}>
-                    <Button mode="contained" style={styles.gridButton} onPress={() => Alert.alert('Info', 'Circular Announcement Feature')}>
-                        Circular
-                    </Button>
-                    <Button mode="contained" style={styles.gridButton} onPress={() => Alert.alert('Info', 'Daily Activity Feature')}>
-                        Activity
-                    </Button>
-                </View>
-
-                <Button
-                    mode="contained"
-                    icon="download"
-                    style={[styles.fullWidthButton, { backgroundColor: 'gray', marginTop: 10 }]}
-                    onPress={() => Linking.openURL('http://10.0.2.2:5000/api/reports/expenses')}
-                >
-                    Download Report
-                </Button>
+            {/* Menu Grid */}
+            <View style={styles.gridContainer}>
+                {menuItems.map((item, index) => (
+                    <Surface key={index} style={styles.gridItem} elevation={1}>
+                        <TouchableRipple
+                            onPress={() => handlePress(item)}
+                            style={styles.touchable}
+                            rippleColor="rgba(184, 183, 188, 0.1)"
+                        >
+                            <View style={styles.itemContent}>
+                                <View style={[styles.iconContainer, { backgroundColor: `${item.color}15` }]}>
+                                    <MaterialCommunityIcons name={item.icon} size={28} color={item.color} />
+                                </View>
+                                <Text style={styles.itemLabel}>{item.label}</Text>
+                            </View>
+                        </TouchableRipple>
+                    </Surface>
+                ))}
             </View>
+
+
         </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 10, backgroundColor: '#f5f5f5' },
-    header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-    card: { marginBottom: 20 },
-    grid: { marginTop: 10, paddingBottom: 20 },
-    row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-    gridButton: { flex: 0.48, marginHorizontal: '1%' },
-    fullWidthButton: { width: '100%', marginBottom: 10 }
+    container: {
+        flex: 1,
+    },
+    header: {
+        padding: 24,
+        paddingTop: 60, // Extra padding for status bar area
+        backgroundColor: '#fff',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderBottomLeftRadius: 30,
+        borderBottomRightRadius: 30,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        marginBottom: 20,
+    },
+    welcomeText: {
+        color: '#64748b',
+        fontWeight: 'bold',
+    },
+    userName: {
+        color: '#1e293b',
+        fontWeight: 'bold',
+        fontSize: 24,
+    },
+    logoutButton: {
+        padding: 8,
+        borderRadius: 20,
+        backgroundColor: '#fef2f2',
+    },
+    statsContainer: {
+        flexDirection: 'row',
+        marginHorizontal: 16,
+        marginBottom: 20,
+        padding: 20,
+        borderRadius: 16,
+        backgroundColor: '#fff',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    statItem: {
+        alignItems: 'center',
+        flex: 1,
+    },
+    statDivider: {
+        width: 1,
+        height: '80%',
+        backgroundColor: '#e2e8f0',
+    },
+    statLabel: {
+        color: '#64748b',
+        fontSize: 12,
+        marginBottom: 4,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    statValue: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    gridContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        paddingHorizontal: 8,
+    },
+    gridItem: {
+        width: (width - 48) / 3, // 3 items per row roughly
+        height: 110,
+        margin: 5,
+        borderRadius: 16,
+        overflow: 'hidden',
+        backgroundColor: '#fff',
+    },
+    touchable: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    itemContent: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 8,
+    },
+    iconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        marginBottom: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    itemLabel: {
+        fontSize: 12,
+        color: '#334155',
+        textAlign: 'center',
+        fontWeight: '600',
+    },
+    footerAction: {
+        padding: 16,
+        marginTop: 10,
+    }
 });
 
 export default ManagerDashboard;
