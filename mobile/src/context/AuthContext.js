@@ -20,9 +20,9 @@ export const AuthProvider = ({ children }) => {
             });
 
             const userInfo = response.data;
-            setUser(userInfo);
             await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
             await AsyncStorage.setItem('token', userInfo.token);
+            setUser(userInfo);
         } catch (e) {
             console.log(e);
             setError(e.response?.data?.message || 'Login failed');

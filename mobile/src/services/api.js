@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // UPDATE THIS WITH YOUR LOCAL IP, NOT LOCALHOST IF ON PHYSICAL DEVICE/EMULATOR
-export const API_URL = 'http://10.1.132.58:5000/api';
+export const API_URL = 'http://192.168.137.1:5000/api';
 
 
 const api = axios.create({

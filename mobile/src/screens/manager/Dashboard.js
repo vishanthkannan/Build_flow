@@ -4,7 +4,7 @@ import { Text, Card, Title, Button, TouchableRipple, Surface, useTheme, Avatar }
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AuthContext } from '../../context/AuthContext';
 import api, { API_URL } from '../../services/api';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 
 const { width } = Dimensions.get('window');
@@ -19,29 +19,39 @@ const ManagerDashboard = () => {
         pendingCount: 0
     });
 
-    useEffect(() => {
-        const fetchSummary = async () => {
-            try {
-                const allocationsRes = await api.get('/allocations');
-                const expensesRes = await api.get('/expenses');
+    useFocusEffect(
+        React.useCallback(() => {
+            if (!user) return;
 
-                const allocations = allocationsRes.data || [];
-                const expenses = expensesRes.data || [];
+            const fetchSummary = async () => {
+                try {
+                    const allocationsRes = await api.get('/allocations');
+                    const expensesRes = await api.get('/expenses');
 
-                const totalAllocated = allocations.reduce((acc, curr) => acc + curr.amount, 0);
-                const approvedExpenses = expenses
-                    .filter(e => e.status === 'Approved')
-                    .reduce((acc, curr) => acc + curr.total_amount, 0);
+                    const allocations = allocationsRes.data || [];
+                    const expenses = expensesRes.data || [];
 
-                const pendingCount = expenses.filter(e => e.status === 'Pending').length;
+                    const totalAllocated = allocations.reduce((acc, curr) => acc + curr.amount, 0);
+                    const approvedExpenses = expenses
+                        .filter(e => e.status === 'Approved')
+                        .reduce((acc, curr) => acc + curr.total_amount, 0);
 
-                setSummary({ totalAllocated, approvedExpenses, pendingCount });
-            } catch (error) {
-                console.error(error);
-            }
-        };
-        fetchSummary();
-    }, []);
+                    const pendingCount = expenses.filter(e => e.status === 'Pending').length;
+
+                    setSummary({ totalAllocated, approvedExpenses, pendingCount });
+                } catch (error) {
+                    if (error.response?.status === 401) {
+                        Alert.alert('Session Expired', 'Please login again.', [
+                            { text: 'OK', onPress: () => logout() }
+                        ]);
+                    } else {
+                        console.error(error);
+                    }
+                }
+            };
+            fetchSummary();
+        }, [user])
+    );
 
     const menuItems = [
         { label: 'Approvals', icon: 'clipboard-check-outline', route: 'Approvals', color: '#10b981' }, // emerald-500
